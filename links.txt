@@ -1,0 +1,6 @@
+8x8 RGB
+http://frederickvandenbosch.be/?p=1014
+
+MAX 
+http://luma-led-matrix.readthedocs.io/en/latest/install.html
+
