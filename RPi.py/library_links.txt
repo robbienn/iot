@@ -1,0 +1,11 @@
+total 40
+drwxr-xr-x 10 pi pi 4096 Jan 20 19:29 .
+drwxr-xr-x 25 pi pi 4096 Jan 21 10:07 ..
+drwxr-xr-x  4 pi pi 4096 Jan 20 20:10 Adafruit_Python_BME280
+drwxr-xr-x 10 pi pi 4096 Dec 17 17:59 Adafruit_Python_DHT
+drwxr-xr-x  9 pi pi 4096 Jan 20 19:28 Adafruit_Python_GPIO
+drwxr-xr-x  4 pi pi 4096 Dec 22 15:37 iot
+drwxr-xr-x 11 pi pi 4096 Dec 17 19:06 luma.led_matrix
+drwxr-xr-x  6 pi pi 4096 Dec  7 21:15 rpi_ws281x
+drwxr-xr-x  6 pi pi 4096 Dec  3 17:44 rpi_ws281x_old
+drwxr-xr-x  5 pi pi 4096 Dec 16 18:18 sim-module
