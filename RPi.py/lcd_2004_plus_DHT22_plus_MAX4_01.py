@@ -57,6 +57,6 @@ while True:
 	    print('Failed to get reading. Try again!')
 
 
-	sleep(10) 
+	sleep(3) 
 
 
