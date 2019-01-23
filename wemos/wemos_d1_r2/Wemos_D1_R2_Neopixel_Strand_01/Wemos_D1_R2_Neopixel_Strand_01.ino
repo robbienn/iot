@@ -15,30 +15,36 @@
 #include <Adafruit_NeoPixel.h>
 
 #define PIN    D6
-#define N_LEDS 16
+//#define N_LEDS 16 // Circular 16LED
+#define N_LEDS 300 // 5M LED STRIPE
 
-#define BRIGHTNESS 30
+#define BRIGHTNESS 128
 
-#define CHASE_NO_PIXELS 6
-#define CHASE_DELAY 100
+#define CHASE_NO_PIXELS 50
+#define CHASE_DELAY 2
+
+#define RANDOM_DELAY_1 2
+#define RANDOM_DELAY_2 10
+#define RANDOM_LOOPS 20
+
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(N_LEDS, PIN, NEO_GRB + NEO_KHZ800);
 
 void setup() {
   strip.begin();
   strip.setBrightness(BRIGHTNESS);
+  randomSeed(analogRead(0));
 }
 
 void loop() {
+  
   chase(strip.Color(255, 0, 0)); // Red
   chase(strip.Color(0, 255, 0)); // Green
   chase(strip.Color(0, 0, 255)); // Blue
 
-
-
-  colorWipe(strip.Color(255, 0, 0), 50); // Red
-  colorWipe(strip.Color(0, 255, 0), 50); // Green
-  colorWipe(strip.Color(0, 0, 255), 50); // Blue
+  //colorWipe(strip.Color(255, 0, 0), 10); // Red
+  //colorWipe(strip.Color(0, 255, 0), 10); // Green
+  //colorWipe(strip.Color(0, 0, 255), 10); // Blue
 
   // Send a theater pixel chase in...
   theaterChase(strip.Color(127, 127, 127), 50); // White
@@ -49,7 +55,15 @@ void loop() {
   rainbowCycle(20);
   theaterChaseRainbow(50);
 
-  
+
+//  for(uint16_t i=0; i<RANDOM_LOOPS; i++) {
+//    randomColors1(RANDOM_DELAY_1);
+//  }
+
+  for(uint16_t i=0; i<RANDOM_LOOPS; i++) {
+    randomColors2(RANDOM_DELAY_2);
+  }
+
 }
 
 // #######################################################
@@ -149,3 +163,28 @@ uint32_t Wheel(byte WheelPos) {
   WheelPos -= 170;
   return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
+
+
+void randomColors1(uint8_t wait) {
+  uint32_t color = strip.Color(random(0,255), random(0,255), random(0,255));
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+    strip.setPixelColor(i, color);
+    strip.show();
+    delay(wait);
+  }
+}
+
+
+void randomColors2(uint8_t wait) {
+
+  uint32_t color = strip.Color(random(0,255), random(0,255), random(0,255));
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+    if(i%8==0) {
+      color = strip.Color(random(0,255), random(0,255), random(0,255));
+    }
+    strip.setPixelColor(i, color);    
+    strip.show();
+    delay(wait);
+  }
+}
+

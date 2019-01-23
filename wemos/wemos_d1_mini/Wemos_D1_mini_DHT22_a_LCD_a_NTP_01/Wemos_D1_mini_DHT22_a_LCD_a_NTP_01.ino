@@ -4,19 +4,25 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-
 #include <TimeLib.h>
 #include <NtpClientLib.h>
 #include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+
+char auth[] = "";
 
 // MAC addresses of WEMOS D1 Mini boards @home
 #define MAC_LOZNICE "60:01:94:14:E2:EC"
-#define MAC_KUCHYN "A0:20:A6:07:56:B5"
+#define MAC_OBYVAK "A0:20:A6:07:56:B5"
 #define MAC_DECAK "5C:CF:7F:34:46:A5"
 
 // WiFI AP configuration
-#define YOUR_WIFI_SSID "Tieto Any Device"
-#define YOUR_WIFI_PASSWD "3aIM:DX6j:4KqD"
+//#define YOUR_WIFI_SSID "Tieto Any Device"
+//#define YOUR_WIFI_PASSWD "3aIM:DX6j:4KqD"
+
+#define YOUR_WIFI_SSID ""
+#define YOUR_WIFI_PASSWD ""
+
 
 // DHT shield configuration
 #define DHTPIN D4     // what pin we're connected to
@@ -41,10 +47,11 @@ bool wifiFirstConnected = false;
 long iterationNumber = 0;
 bool lcdIsOn = true;
 String location = "UNKNOWN";
+int loop_delay_after_failure = 5000;
 int loop_delay_after_date_time = 5000;
 int loop_delay_after_th = 5000;
 float temperature, humidity; // Temperature and humidity value
-String date_str, time_str;
+String date_str, time_str, timestamp;
 
 // NTP
 /*************************************************************************/
@@ -117,6 +124,9 @@ void print_th()
   }
   
   display.display();
+
+  Blynk.virtualWrite(V5, humidity);
+  Blynk.virtualWrite(V6, temperature);
 }
 
 /*************************************************************************/
@@ -138,6 +148,8 @@ void print_date_time()
   }
   
   display.display();
+
+  Blynk.virtualWrite(V4, timestamp);
 }
 
 /*************************************************************************/
@@ -149,9 +161,9 @@ void get_and_set_location()
   if (mac_address == MAC_LOZNICE) {
     Serial.println("LOZNICE");
     location = "LOZ";
-  } else if (mac_address == MAC_KUCHYN) {
-    Serial.println("KUCHYN");
-    location = "KUCH";
+  } else if (mac_address == MAC_OBYVAK) {
+    Serial.println("OBYVAK");
+    location = "OBYVAK";
   } else if (mac_address == MAC_DECAK) {
     Serial.println("DETSKY POKOJ");
     location = "DECAK";
@@ -166,11 +178,12 @@ void setup()
 {
   Serial.begin(115200);
   Serial.println("Serial console initialized");
-  
+
   // NTP
   static WiFiEventHandler e1, e2, e3;
   WiFi.mode (WIFI_STA);
   WiFi.begin (YOUR_WIFI_SSID, YOUR_WIFI_PASSWD);
+
   NTP.onNTPSyncEvent ([](NTPSyncEvent_t event) {
       ntpEvent = event;
       syncEventTriggered = true;
@@ -178,7 +191,8 @@ void setup()
   e1 = WiFi.onStationModeGotIP (onSTAGotIP);// As soon WiFi is connected, start NTP Client
   e2 = WiFi.onStationModeDisconnected (onSTADisconnected);
   e3 = WiFi.onStationModeConnected (onSTAConnected);
-  
+
+  Blynk.begin(auth, YOUR_WIFI_SSID, YOUR_WIFI_PASSWD);
 
   get_and_set_location();
   Serial.println("Location determined");
@@ -224,17 +238,20 @@ void loop()
 
   date_str = NTP.getDateStr().substring(0,5);
   time_str = NTP.getTimeStr().substring(0,5);
-  Serial.print("TIME: "); Serial.print(date_str); Serial.print(" - ");  Serial.println(time_str);
+  timestamp = date_str + " - " + time_str;
+  Serial.print("DATE: "); Serial.print(date_str); Serial.print(", TIME: ");  Serial.println(time_str);
 
   Serial.print("WiFi is "); Serial.println(WiFi.isConnected() ? "connected" : "not connected");
   Serial.print("Uptime: "); Serial.print(NTP.getUptimeString()); Serial.print(" since "); Serial.println(NTP.getTimeDateString(NTP.getFirstSync()).c_str());
 
+  Blynk.run();
 
   temperature = dht.readTemperature();
   humidity = dht.readHumidity();  
   if (isnan(temperature) || isnan(humidity)) 
   {
-    Serial.println("Failed to read from DHT sensor!");    
+    Serial.println("Failed to read from DHT sensor!");   
+    delay(loop_delay_after_failure);
   } else {
     Serial.print("T: "); Serial.print(temperature); Serial.print(" - H: "); Serial.println(humidity);    
     for (int l=1; l<=5; l++) {
